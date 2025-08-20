@@ -1,3 +1,4 @@
+import math
 from huffman_node import HuffmanNode
 
 
@@ -57,18 +58,29 @@ def byte_to_binary(input: int) -> str:
 
 
 def int_to_binary(input: int) -> str:
-    return format(input, "032b")
+    if input == 0:
+        return "0" * 7
+
+    bit_count = input.bit_length()
+    nibble_count = math.ceil(bit_count / 4)
+
+    padded_bit_count = nibble_count * 4
+
+    size = nibble_count - 1
+    value = format(input, f"0{padded_bit_count}b")
+
+    return f"{format(size, '03b')}{value}"
 
 
-def string_to_binary(input: str) -> str:
-    return "".join(byte_to_binary(ord(char)) for char in input)
+def char_to_binary(input: str) -> str:
+    return "".join(format(ord(input), "07b"))
 
 
 def serialize_table(table: dict[str, str]) -> str:
     serialized = ""
 
     for char, code in table.items():
-        serialized += string_to_binary(char)
+        serialized += char_to_binary(char)
 
         serialized += int_to_binary(len(code))
         serialized += code
@@ -80,7 +92,7 @@ def serialize(input: str, table: dict[str, str]) -> bytes:
     bits = ""
 
     bits += serialize_table(table)
-    bits += byte_to_binary(0)
+    bits += "0" * 7
 
     for char in input:
         bits += table[char]

@@ -5,7 +5,7 @@ def binary_to_int(input: str) -> int:
     return int(input, 2)
 
 
-def binary_to_string(input: str) -> str:
+def binary_to_char(input: str) -> str:
     return chr(binary_to_int(input))
 
 
@@ -13,19 +13,27 @@ def read_n_bits(input: deque, n: int) -> str:
     return "".join(input.popleft() for _ in range(n))
 
 
+def extract_compressed_int(input: deque) -> int:
+    size_binary = read_n_bits(input, 3)
+    nibble_count = binary_to_int(size_binary) + 1
+
+    size = nibble_count * 4
+    value_binary = read_n_bits(input, size)
+
+    return binary_to_int(value_binary)
+
+
 def huffman_table(bits: deque) -> dict[str, str]:
     output = {}
 
     while True:
-        char_binary = read_n_bits(bits, 8)
-        if char_binary == "00000000":
+        char_binary = read_n_bits(bits, 7)
+        if char_binary == "0" * 7:
             break
 
-        char = binary_to_string(char_binary)
+        char = binary_to_char(char_binary)
 
-        length_binary = read_n_bits(bits, 32)
-        length = binary_to_int(length_binary)
-
+        length = extract_compressed_int(bits)
         code = read_n_bits(bits, length)
 
         output[code] = char
